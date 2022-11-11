@@ -66,28 +66,31 @@ function setNoPrint(p, selector) {
 }
 
 export class SvgReport {
-    constructor(recipeUrl, selector) {
-	this.recipeUrl = recipeUrl
+    constructor(recipeUrlOrObject, selector) {
+	this.recipeUrlOrObject = recipeUrlOrObject
 	this.selector = selector
-	this.svgdivs = [];
+	this.svgdivs = []
     }
 
     render() {
-	$.getJSON(this.recipeUrl, json => {
-            console.log(json);
-            if($.isArray(json)) {
-		for (var i in json) {
-		    console.log(i)
-		    this.renderEach($(this.selector), json[i], i)
-		}
-            } else {
-		this.renderEach($(this.selector), json, 0)
-            }
-	    
-	    $('body').children().each((i, e) => setNoPrint($(e), this.selector))
-	})
+        let tmp = this.recipeUrlOrObject;
+        if (typeof tmp === "string" || tmp instanceof String)
+            $.getJSON(tmp, json => this.doRender(json))
+        else
+            this.doRender(tmp)
     }
     
+    doRender(obj) {
+        console.log(obj);
+        if(Array.isArray(obj)) {
+            for (var i in obj)
+                this.renderEach($(this.selector), obj[i], i)
+        } else {
+            this.renderEach($(this.selector), obj, 0)
+        }
+        $('body').children().each((i, e) => setNoPrint($(e), this.selector))
+    }
+
     renderEach(svgArea, svgRecipe, i) {
 	console.log(svgRecipe)
 	console.log(svgRecipe['svgUrl'])
@@ -112,10 +115,10 @@ export class SvgReport {
 	//let paper = new SvgPaper('#' + svgId);
 	for (let ph in map) {
             console.log(ph)
-            console.log(svgRecipe['placeHolderValueMap'][ph])
-            if (!svgRecipe['placeHolderValueMap'][ph])
+            console.log(svgRecipe['placeHolders'][ph])
+            if (!svgRecipe['placeHolders'][ph])
                 continue
-            let v = svgRecipe['placeHolderValueMap'][ph]['value']
+            let v = svgRecipe['placeHolders'][ph]['value']
             for (let item of map[ph]) {
                 let text = item["text"]
                 let rect = item["rect"]
@@ -131,10 +134,6 @@ export class SvgReport {
                 console.log(rect.attr("width"))
                 //        paper
                 //.replace(ph, v + v + v + '\n' + v + v + v + v + v + v + v)
-                //.adjustTextarea(text, rect.attr('width'), rect.attr('height'))
-                //.adjustTextarea('#' + text.attr('id'), rect.attr('width'), rect.attr('height'))
-                //.adjustTextarea(map[ph])
-                //.adjustText(map[ph], "")
                 console.log(`opt: ${item['opt']}`)
                 if (item["opt"] && item["opt"].includes('M'))
 		    adjustTextarea(item, item["opt"])
