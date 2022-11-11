@@ -1,6 +1,7 @@
 'use strict'
 import jQuery from 'jquery'
 import getMatrix from './utility/matrix'
+import fixTextTransform from './utility/fix-text-transform'
 
 const $ = jQuery
 
@@ -24,7 +25,8 @@ export default (textArea, textAnchor, paperPixelRatio = 1) => {
 console.log(boundingClientRectWidth)
  console.log(paperPixelRatio)
 console.log(textArea.rect.attr('width'))
-    let tspan = $(text.find('tspan')[0])
+    const tspan = $(text.find('tspan')[0])
+
     text.empty()
     if (boundingClientRectWidth * paperPixelRatio > textArea.rect.attr('width')) {
       //if (tspan.length > 0)
@@ -45,11 +47,19 @@ console.log(textArea.rect.attr('width'))
     text.append(tspan);
   }
 
+  //vertical alignment (always center)
+  const areaH = textArea.rect.attr('height')
+  const textH = text.find('tspan')[0].getClientRects()[0].height
+  text.attr('transform', getMatrix(text.attr('transform'), 0, areaH / 2 - textH / 2))     
+
   // alignment
   //if (!!config['text-anchor'] && config['text-anchor'] !== 'start') {
   if (!!textAnchor && textAnchor !== 'start') {
     //const w = parseFloat(config['textLength'])
-    const w = parseFloat(textLength);
+    const areaW = parseFloat(textLength);
+    const textW = text.find('tspan')[0].getClientRects()[0].width;
+    console.log(textW);
+
     let x = 0
 
     //if ($this.getAttribute('transform')) {
@@ -61,14 +71,14 @@ console.log(textArea.rect.attr('width'))
     //  $this.setAttribute('transform', `translate(${x + (w / 2)} ${y})`)
    // }
    if (textAnchor === 'm') {
-        text.attr('transform', getMatrix(text.attr('transform'), w / 2, 0))     
+        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))     
    }
 
     //if (config['text-anchor'] === 'end') {
     //  $this.setAttribute('transform', `translate(${x + w} ${y})`)
     //}
     if (textAnchor === 'e') {
-        text.attr('transform', getMatrix(text.attr('transform'), w , 0))     
+        text.attr('transform', getMatrix(text.attr('transform'), areaW - textW , 0))     
     }
 
     //$this.setAttribute('text-anchor', config['text-anchor'])
