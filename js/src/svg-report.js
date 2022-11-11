@@ -22,21 +22,21 @@ function getRect(text) {
 }
 
 function makeMap(svg) {
-    let map = {}
-    let texts = svg.find("text")
-    let re = /^%(([tcb]|[smeM])*)(%.*%)$/
+    const map = {}
+    const texts = svg.find("text")
+    const re = /^(%.*%)$/
     texts.each((index, t) => {
 	let text = $(t)
 	let m = text.text().match(re)
 	if (m) {
-            console.log(`${text.text()}: ${m[1]}, ${m[2]}, ${m[3]}`)
+            console.log(`${text.text()}: ${m[1]}`)
 	    let rect = getRect(text)
 	    if (rect != null) {
 		console.log(text)
-		let ph = m[3]
+		let ph = m[1]
 		if (!map[ph])
 		    map[ph] = []
-		map[ph].push({"text": text, "rect": rect, "opt": m[1]})
+		map[ph].push({"text": text, "rect": rect})
 	    }
 	}
     })
@@ -73,7 +73,7 @@ export class SvgReport {
     }
 
     render() {
-        let tmp = this.recipeUrlOrObject;
+        const tmp = this.recipeUrlOrObject;
         if (typeof tmp === "string" || tmp instanceof String)
             $.getJSON(tmp, json => this.doRender(json))
         else
@@ -94,14 +94,14 @@ export class SvgReport {
     renderEach(svgArea, svgRecipe, i) {
 	console.log(svgRecipe)
 	console.log(svgRecipe['svgUrl'])
-	let svgText = $.get({url: svgRecipe['svgUrl'], async: false}).responseText
-	let svg = $(svgText)
-	let r = (Math.random() + 1).toString(36).substring(7)
-	console.log("random", r)
-	let svgId = r + "_svg_" + i
+	const svgText = $.get({url: svgRecipe['svgUrl'], async: false}).responseText
+	const svg = $(svgText)
+	const r = (Math.random() + 1).toString(36).substring(7)
+	console.log("random: " + r)
+	const svgId = r + "_svg_" + i
 	console.log(svgId)
 	svg.attr('id', svgId) 
-	let svgdiv = $("<div></div>");  //need to avoid extra blank page for chrome
+	const svgdiv = $("<div></div>");  //need to avoid extra blank page for chrome
 	this.svgdivs.push(svgdiv)
 	svgdiv.append(svg)
 	svgArea.append(svgdiv)
@@ -110,22 +110,23 @@ export class SvgReport {
 	const viewBoxWidth = svgArea.attr('viewBox')?.split(/ +/)[2] ?? null
 	const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
 
-	var map = makeMap(svg);
+	const map = makeMap(svg);
 	console.log(map);
-	//let paper = new SvgPaper('#' + svgId);
 	for (let ph in map) {
             console.log(ph)
-            console.log(svgRecipe['placeHolders'][ph])
-            if (!svgRecipe['placeHolders'][ph])
+            console.log(svgRecipe['holderMap'][ph])
+            const value = svgRecipe['holderMap'][ph]
+            if (!value)
                 continue
-            let v = svgRecipe['placeHolders'][ph]['value']
+            const v = value['value']
+            const o = value['opt']
             for (let item of map[ph]) {
-                let text = item["text"]
-                let rect = item["rect"]
+                const text = item["text"]
+                const rect = item["rect"]
                 if (!text) continue;
-	       let tspan = $(text.find('tspan')[0])
-	       text.empty();
-	       text.append(tspan);
+                const tspan = $(text.find('tspan')[0])
+                text.empty();
+                text.append(tspan);
                 text.children(0).text(v ? v : "");
                 //text.children(0).text(v? v + v + v + v + v: "")
                 console.log(text.text())
@@ -134,13 +135,13 @@ export class SvgReport {
                 console.log(rect.attr("width"))
                 //        paper
                 //.replace(ph, v + v + v + '\n' + v + v + v + v + v + v + v)
-                console.log(`opt: ${item['opt']}`)
-                if (item["opt"] && item["opt"].includes('M'))
-		    adjustTextarea(item, item["opt"])
+                //console.log(`opt: ${item['opt']}`)
+                console.log(`opt: ${o}`)
+                //if (item["opt"] && item["opt"].includes('M'))
+                if (o && o.includes('M'))
+		    adjustTextarea(item, o)
                 else
-		    adjustText(item, item["opt"], paperPixelRatio)
-            // paper.replace(ph, v + v + v + v)
-            // .adjustText(map[ph])
+	            adjustText(item, o, paperPixelRatio)
             }
 	}
 	$('#' + svgId).replaceWith($('#' + svgId).prop('outerHTML'));
