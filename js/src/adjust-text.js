@@ -6,8 +6,9 @@ import fixTextTransform from './utility/fix-text-transform'
 const $ = jQuery
 
 //export default (selector, config, paperPixelRatio = 1) => {
-export default (textArea, textAnchor, paperPixelRatio = 1) => {
+export default (textArea, opt, paperPixelRatio = 1) => {
   //const $this = document.querySelector(selector)
+  if (!opt) opt = {};
   let text = $('#' + textArea.text.attr('id'));
   const boundingClientRectWidth = text[0].getBoundingClientRect().width;
   const textLength = textArea.rect.attr('width')
@@ -54,14 +55,13 @@ console.log(textArea.rect.attr('width'))
 
   // alignment
   //if (!!config['text-anchor'] && config['text-anchor'] !== 'start') {
-  if (!!textAnchor && textAnchor !== 'start') {
+  let textAnchor = "s"
+  if (!!opt.alignx && opt.alignx !== 's') {
     //const w = parseFloat(config['textLength'])
-    const areaW = parseFloat(textLength);
-    const textW = text.find('tspan')[0].getClientRects()[0].width;
-    console.log(textW);
+    const areaW = parseFloat(textLength)
+    //const textW = text.find('tspan')[0].getClientRects()[0].width
 
-    let x = 0
-
+    ///let x = 0
     //if ($this.getAttribute('transform')) {
     //  x = parseFloat($this.getAttribute('transform').match(/translate\((\S+) .+\)/)[1])
     //  y = parseFloat($this.getAttribute('transform').match(/translate\(\S+ (.+)\)/)[1])
@@ -70,15 +70,18 @@ console.log(textArea.rect.attr('width'))
     //if (config['text-anchor'] === 'middle') {
     //  $this.setAttribute('transform', `translate(${x + (w / 2)} ${y})`)
    // }
-   if (textAnchor === 'm') {
-        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))     
+   if (opt.alignx === 'm') {
+        //text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))
+        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2, 0))
+        textAnchor = 'middle'     
    }
 
     //if (config['text-anchor'] === 'end') {
     //  $this.setAttribute('transform', `translate(${x + w} ${y})`)
     //}
-    if (textAnchor === 'e') {
-        text.attr('transform', getMatrix(text.attr('transform'), areaW - textW , 0))     
+    if (opt.alignx === 'e') {
+        text.attr('transform', getMatrix(text.attr('transform'), areaW , 0))
+        textAnchor = 'end'     
     }
 
     //$this.setAttribute('text-anchor', config['text-anchor'])

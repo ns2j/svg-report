@@ -6,53 +6,46 @@ import fixTextTransform from './utility/fix-text-transform'
 
 const $ = jQuery
 
-export default (textArea, opt, nowrap = false) => {
+export default (textArea, opt) => {
     //export default (textArea, lineHeight = 1.2, paddingX = 0.5, paddingY = 0.5, nowrap = false) => {
     //const originalFontSize = parseInt(textSvg.match(/.+font-size="(\d+)".+/)[1])
-    let text = textArea.text;
-    let rect = textArea.rect;
+    console.log(opt);
+    if (!opt) opt = {}
+    let text = textArea.text
+    let rect = textArea.rect
     
-    let originalFontSize = 14;
+    let originalFontSize = 14
     let m = text.attr("style").match(/.+font-size:(\d+)px.+/)
     if (m)
 	originalFontSize = parseInt(m[1])
     let fontSize = originalFontSize
     console.log(fontSize)
 
-    let lineHeight = 1.2
-    let paddingX = 0.0
-    let paddingY = 0.0
+    const lineHeight = 1.2
+    let paddingX = opt.padx ? opt.padx : 0.0
+    let paddingY = opt.pady ? opt.pady : 0.0
     m = text.attr("style").match(/.+;shape-padding:(\d+.\d+);.+/)
     if (m) {
 	console.log(`padding: ${m[1]}`)
 	let p = parseFloat(m[1])
 	//paddingX = p / fontSize
 	//paddingY = p / fontSize
-	paddingX = p
-	paddingY = p
+	paddingX += p
+	paddingY += p
     }
     
-    
     // find the right-size font-size
-    //const physicalLines = textContent.split("\n")
     const physicalLines = text.text().split("\n")
     console.log(physicalLines)
-    let logicalLines = []
+    let logicalLines;
     while (true) {
-//	let maxRows = Math.floor((rect.attr('height') - (2 * fontSize * paddingY)) / (fontSize * lineHeight))
-//	let maxColumns = Math.floor((rect.attr('width') - (2 * fontSize * paddingX)) / fontSize) // doesn't care about proportional font
-
 	let maxRows = Math.floor((rect.attr('height') - (2 * paddingY)) / (fontSize * lineHeight))
 	let maxColumns = Math.floor((rect.attr('width') - (2 * paddingX)) / fontSize) // doesn't care about proportional font
 
-	if (nowrap) {
-	    logicalLines = physicalLines
-	} else {
-	    logicalLines = []
-	    physicalLines.forEach(line => {
-		logicalLines = logicalLines.concat(splitStringByWidth(line, maxColumns * 2)) // 2 single-byte characters can be placed in 1 column
-	    })
-	}
+       logicalLines = []
+       physicalLines.forEach(line => {
+         logicalLines = logicalLines.concat(splitStringByWidth(line, maxColumns * 2)) // 2 single-byte characters can be placed in 1 column
+        })
 
 	if (logicalLines.length > maxRows) {
 	    fontSize *= 0.95
@@ -66,41 +59,27 @@ export default (textArea, opt, nowrap = false) => {
     let dh = rect.attr('height') - height
     console.log(`dh: ${dh}`)
 
-    // raise y-coordinate up because y-coordinate of <text transform="translate(x y)"> or <tspan y=""> is on lower base of text object
-    let adjustY = fontSize - originalFontSize;  //for top
-    if (opt) {
-        if (opt.includes('c'))
-            adjustY = fontSize - originalFontSize + dh / 2 - paddingY //for center
-        else if (opt.includes('b'))
+    let adjustY = fontSize - originalFontSize  //for top
+    let startY = paddingY   
+    if (opt.aligny && !opt.aligny.includes('t')) {
+        startY = 0.0
+        if (opt.aligny.includes('c'))
+            adjustY = fontSize - originalFontSize + dh / 2 - (logicalLines.length - 1) * (fontSize - originalFontSize) / 2 //for center
+        else if (opt.aligny.includes('b'))
             adjustY = fontSize - originalFontSize + dh  - paddingY * 2//for bottom
-    }
+     }
 
-    
-    //let adjustedTextSvg = fixTextTransform($(textSvg))
-    //  adjustedTextSvg = adjustedTextSvg.replace(new RegExp('<tspan(.|\\s)+</text>'), '')
-    //  adjustedTextSvg = adjustedTextSvg.replace(new RegExp('font-size="\\d+"'), `font-size="${fontSize}"`)
-    //  adjustedTextSvg += '{tspan}</text>'
-    //let adjustedText = fixTextTransform(text)
     fixTextTransform(text)
 
     let style = text.attr("style")
     text.attr("style", style.replace(/font-size:\d+px/, "font-size:" + fontSize + "px"))
-    //text.attr("style", style.replace(/shape-padding.*?;/, ""))
     text.empty();
     
-    //    const x = fontSize * paddingX
-    const x = 0.0
+    const x = paddingX
     logicalLines.forEach((line, i) => {
 	//const y = adjustY + fontSize * (paddingY + (i * lineHeight))
-	const y = adjustY + fontSize * (i * lineHeight)
 	//text.append(`<tspan x="${x}" y="${y}">${line}</tspan>`)
+       const y = startY + adjustY + fontSize * lineHeight * i
 	$(`<tspan x="${x}" y="${y}">${line}</tspan>`).appendTo(text)
-	
     })
-
-    console.log(text.prop('outerHTML'))
-    //text.replaceWith(text.prop('outerHTML'))
-    //adjustedTextSvg = adjustedTextSvg.replace('{tspan}', tspan)
-
-    //return adjustedTextSvg
 }
