@@ -57,20 +57,16 @@ console.log(areaW)
 
   // alignment
   let textAnchor = "start"
-  if (!!opt.align && opt.align !== 's') {
-   if (opt.align === 'm') {
-        //text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))
-//        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2, 0))
-        text.attr('transform', `translate(${areaW / 2 * MMPPX}, 0)`)
-        textAnchor = 'middle'     
-   }
-
-    if (opt.align === 'e') {
-        //text.attr('transform', getMatrix(text.attr('transform'), areaW , 0))
-        text.attr('transform', `translate(${areaW * MMPPX}, 0)`)
-        textAnchor = 'end'     
-    }
-
-    text.attr('text-anchor', textAnchor)
+  switch(opt.align) {
+    case 'm':
+      text.attr('transform', `translate(${areaW / 2 * MMPPX}, 0)`)
+      text.attr('text-anchor', 'middle')
+      break;
+    case 'e':
+      text.attr('transform', `translate(${areaW * MMPPX}, 0)`)
+      text.attr('text-anchor', 'end')
+      break;
+    default:
+      break;
   }
 }

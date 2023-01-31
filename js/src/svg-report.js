@@ -120,7 +120,7 @@ export class SvgReport {
             console.log(text.attr("id"))
             console.log(text.attr("transform"))
  
-            if (o && o.align && o.align.match(/[tcb]/))
+            if (o && o.align && o.align.match(/[TMB]/))
                adjustTextarea(text, areaH, o)
             else
                adjustText(text, o, paperPixelRatio)

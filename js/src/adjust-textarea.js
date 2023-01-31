@@ -11,6 +11,8 @@ export default (text, areaH, opt) => {
     console.log(opt);
     if (!opt) opt = {}
     
+    areaH = opt.height ? opt.height / MMPPX : areaH
+    
     let m = text.attr("style").match(/font-size:(.*?)px/)
     let originalFontSize = m ? parseFloat(m[1]) / MMPPX : 4.9389 / MMPPX
     let fontSize = opt.fontSize ? opt.fontSize * NINETYSIX_DPI : originalFontSize
@@ -46,12 +48,15 @@ export default (text, areaH, opt) => {
     let dh = areaH - height 
     console.log(`dh: ${dh}`)
     let adjustY = fontSize - originalFontSize  //for top
-    if (opt.align && !opt.align.includes('t')) {
-        if (opt.align.includes('c'))
-            adjustY += dh / 2 //for center
-        else if (opt.align.includes('b'))
-            adjustY += dh //for bottom
-     }
+    switch(opt.align) {
+      case 'M':
+        adjustY += dh / 2
+        break
+      case 'B':
+        adjustY += dh //for bottom
+      default:
+        break;       
+    }
 
     fixTextTransform(text)
 
