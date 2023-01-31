@@ -61,7 +61,7 @@ export default (text, areaH, opt) => {
     fixTextTransform(text)
 
     text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * MMPPX}px`))
-    text.attr("style", text.attr('style').replace(/line-height:.*?;/, 'line-height:${lineHeight};'))
+    text.attr("style", text.attr('style').replace(/line-height:.*?;/, `line-height:${lineHeight};`))
     console.log(text.attr('style'))
     text.empty();
 
