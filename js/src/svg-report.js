@@ -5,39 +5,34 @@ import adjustText from './adjust-text.js'
 import adjustTextarea from './adjust-textarea.js'
 const $ = jQuery
 
-function getRect(text) {
-    let s = text.attr("style");
-    let sp = s.split(";");
-    for (let spi of sp) {
-        let re = /shape-inside:url\((.*)\)/;
-        if (spi.match(re)) {
-            let rid = spi.replace(re, '$1');
-            let r = $(rid);
-            return r;
-        }
-        
-    }
-    return null;
-}
-
 function makeMap(svg) {
-    const map = {}
-    const texts = svg.find("text")
-    const re = /^(%.*%)$/
-    texts.each((index, t) => {
-        let text = $(t)
-        let m = text.text().match(re)
-        if (m) {
-            let rect = getRect(text)
-            if (rect != null) {
-                let ph = m[1]
-                if (!map[ph])
-                    map[ph] = []
-                map[ph].push({"text": text, "rect": rect})
-            }
-        }
-    })
-    return map
+  const map = {}
+  const texts = svg.find("text")
+  const re = /^(%.*%)/
+  texts.each((index, t) => {
+    let text = $(t)
+    let m = text.text().match(re)
+    if (m) {
+      let ph = m[1]
+      if (!map[ph])
+        map[ph] = []
+      map[ph].push(text)
+     }
+  })
+  return map
+}  
+
+function getAreaHeight(text) {
+  const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
+  const style = text.attr('style')
+  let m = style.match(/font-size:(.*?)px/)
+  const fontSize = m ? parseFloat(m[1]) / mmppx : 4.2333 / mmppx
+  m = style.match(/line-height:(\d+.\d+)/)
+  const lineHeight = m ? parseFloat(m[1]) : 1.25;
+  console.log(`lineHeight: ${lineHeight}`)
+  const lineCount = text.find('tspan').length
+  console.log(`lineCount: ${lineCount}`)
+  return lineCount * lineHeight * fontSize;
 }
 
 function changeIdAll(svgId) {
@@ -105,30 +100,29 @@ export class SvgReport {
         const viewBoxWidth = svgArea.attr('viewBox')?.split(/ +/)[2] ?? null
         const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
 
-        const map = makeMap(svg);
+        const map = makeMap(svg)
+        console.log(map)
         for (let ph in map) {
           console.log(svgRecipe['holderMap'][ph])
           const value = svgRecipe['holderMap'][ph]
           if (!value) continue
           const v = value['value']
           const o = value['opt']
-          for (let item of map[ph]) {
-            const text = item["text"]
-            const rect = item["rect"]
-            if (!text) continue;
+          for (let text of map[ph]) {
+            const areaH = getAreaHeight(text)
+            console.log(`areaH: ${areaH}`)
             const tspan = $(text.find('tspan')[0])
             text.empty();
             text.append(tspan);
-            text.children(0).text(v ? v : "");
+            text.children(0).text(v ? v : "")
             console.log(text.text())
             console.log(text.attr("id"))
             console.log(text.attr("transform"))
-            console.log(rect.attr("width"))
  
-            if (o && o.alignx && o.alignx.includes('M'))
-               adjustTextarea(item, o)
+            if (o && o.align && o.align.match(/[tcb]/))
+               adjustTextarea(text, areaH, o)
             else
-               adjustText(item, o, paperPixelRatio)
+               adjustText(text, o, paperPixelRatio)
            }
          }
         $('#' + svgId).replaceWith($('#' + svgId).prop('outerHTML'));

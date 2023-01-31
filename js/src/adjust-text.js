@@ -1,90 +1,76 @@
 'use strict'
 import jQuery from 'jquery'
-import getMatrix from './utility/matrix'
-import fixTextTransform from './utility/fix-text-transform'
 
 const $ = jQuery
 
-//export default (selector, config, paperPixelRatio = 1) => {
-export default (textArea, opt, paperPixelRatio = 1) => {
-  //const $this = document.querySelector(selector)
-  if (!opt) opt = {};
-  let text = $('#' + textArea.text.attr('id'));
-  const boundingClientRectWidth = text[0].getBoundingClientRect().width;
-  const textLength = textArea.rect.attr('width')
-  //if (!$this) {
-  //  return
-  //}
+export default (text, opt, paperPixelRatio = 1) => {
+  const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
+  if (!opt) opt = {}
+  const boundingClientRectWidth = text[0].getBoundingClientRect().width
+
+  let m = text.attr('style').match(/font-size:(.*?)px/)
+  const originalFontSize = m ? parseFloat(m[1]) / 1.3333 / mmppx : 4.2333 / mmppx
+  if (opt && opt.fontSize) {
+    text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${opt.fontSize * 1.3333 * mmppx}px`))
+    console.log(`originalFonSize: ${originalFontSize}, opt.fontSize: ${opt.fontSize}}`)
+  } 
+
+  let textLength
+  if (opt && opt.width) {
+     textLength = opt.width
+   } else {
+    m = text.attr('style').match(/inline-size:(\d+.\d+)/)
+    textLength = m ? parseFloat(m[1]) : 10.0;
+   }
+   const areaW = textLength / mmppx
+                
+  console.log(`textLength: ${textLength}`)
 
   // shrink text element to specified width
-  //if (!!config['textLength']) {
   if (!!textLength) {
     // for firefox
-    // @see https://developer.mozilla.org/ja/docs/Web/API/Element/clientWidth
-    //$this.style.display = 'block'
     text.css('display', 'block')
+
 console.log(boundingClientRectWidth)
  console.log(paperPixelRatio)
-console.log(textArea.rect.attr('width'))
+console.log(areaW)
+
+    text.attr('style', text.attr('style').replace(/inline-size:.*?px/, ''))
+     console.log(text.attr('style'))
     const tspan = $(text.find('tspan')[0])
 
     text.empty()
-    if (boundingClientRectWidth * paperPixelRatio > textArea.rect.attr('width')) {
-      //if (tspan.length > 0)
-        //tspan = $(tspan[0]);
-      //$this.querySelector('tspan').setAttribute('textLength', textArea.rect.attr('width'))
-      //$this.querySelector('tspan').setAttribute('lengthAdjust', 'spacingAndGlyphs')
-      tspan.attr('textLength', textLength)
+    if (boundingClientRectWidth * paperPixelRatio > areaW) {
+      tspan.attr('textLength', parseFloat(textLength))
       tspan.attr('lengthAdjust', 'spacingAndGlyphs')
 
-      // for firefox
-      // @see https://bugzilla.mozilla.org/show_bug.cgi?id=890692
-      //$this.setAttribute('textLength', textArea.rect.attr('width'))
-      //$this.setAttribute('lengthAdjust', 'spacingAndGlyphs')
-      text.attr('textLength', textLength)
+      text.attr('textLength', parseFloat(textLength))
       text.attr('lengthAdjust', 'spacingAndGlyphs')
       
     }
     text.append(tspan);
   }
 
-  //vertical alignment (always center)
-  const areaH = textArea.rect.attr('height')
-  const textH = text.find('tspan')[0].getClientRects()[0].height
-  text.attr('transform', getMatrix(text.attr('transform'), 0, areaH / 2 - textH / 2))     
+    //const areaH = textArea.rect.attr('height')
+  //const textH = text.find('tspan')[0].getClientRects()[0].height
+//  text.attr('transform', getMatrix(text.attr('transform'), 0, areaH / 2 - textH / 2))     
 
   // alignment
-  //if (!!config['text-anchor'] && config['text-anchor'] !== 'start') {
-  let textAnchor = "s"
-  if (!!opt.alignx && opt.alignx !== 's') {
-    //const w = parseFloat(config['textLength'])
-    const areaW = parseFloat(textLength)
-    //const textW = text.find('tspan')[0].getClientRects()[0].width
-
-    ///let x = 0
-    //if ($this.getAttribute('transform')) {
-    //  x = parseFloat($this.getAttribute('transform').match(/translate\((\S+) .+\)/)[1])
-    //  y = parseFloat($this.getAttribute('transform').match(/translate\(\S+ (.+)\)/)[1])
-   // }
-
-    //if (config['text-anchor'] === 'middle') {
-    //  $this.setAttribute('transform', `translate(${x + (w / 2)} ${y})`)
-   // }
-   if (opt.alignx === 'm') {
+  let textAnchor = "start"
+  if (!!opt.align && opt.align !== 's') {
+   if (opt.align === 'm') {
         //text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))
-        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2, 0))
+//        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2, 0))
+        text.attr('transform', `translate(${areaW / 2 * mmppx}, 0)`)
         textAnchor = 'middle'     
    }
 
-    //if (config['text-anchor'] === 'end') {
-    //  $this.setAttribute('transform', `translate(${x + w} ${y})`)
-    //}
-    if (opt.alignx === 'e') {
-        text.attr('transform', getMatrix(text.attr('transform'), areaW , 0))
+    if (opt.align === 'e') {
+        //text.attr('transform', getMatrix(text.attr('transform'), areaW , 0))
+        text.attr('transform', `translate(${areaW * mmppx}, 0)`)
         textAnchor = 'end'     
     }
 
-    //$this.setAttribute('text-anchor', config['text-anchor'])
     text.attr('text-anchor', textAnchor)
   }
 }

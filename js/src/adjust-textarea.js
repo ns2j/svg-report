@@ -6,41 +6,28 @@ import fixTextTransform from './utility/fix-text-transform'
 
 const $ = jQuery
 
-export default (textArea, opt) => {
-    //export default (textArea, lineHeight = 1.2, paddingX = 0.5, paddingY = 0.5, nowrap = false) => {
-    //const originalFontSize = parseInt(textSvg.match(/.+font-size="(\d+)".+/)[1])
+export default (text, areaH, opt) => {
+    const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
     console.log(opt);
     if (!opt) opt = {}
-    let text = textArea.text
-    let rect = textArea.rect
     
-    let originalFontSize = 14
-    let m = text.attr("style").match(/.+font-size:(\d+)px.+/)
-    if (m)
-	originalFontSize = parseInt(m[1])
-    let fontSize = originalFontSize
+    let m = text.attr("style").match(/font-size:(.*?)px/)
+    let originalFontSize = m ? parseFloat(m[1]) / mmppx : 4.9389 / mmppx
+    let fontSize = opt.fontSize ? opt.fontSize * 1.3333 : originalFontSize
     console.log(fontSize)
-
-    const lineHeight = 1.2
-    let paddingX = opt.padx ? opt.padx : 0.0
-    let paddingY = opt.pady ? opt.pady : 0.0
-    m = text.attr("style").match(/.+;shape-padding:(\d+.\d+);.+/)
-    if (m) {
-	console.log(`padding: ${m[1]}`)
-	let p = parseFloat(m[1])
-	//paddingX = p / fontSize
-	//paddingY = p / fontSize
-	paddingX += p
-	paddingY += p
-    }
     
     // find the right-size font-size
     const physicalLines = text.text().split("\n")
     console.log(physicalLines)
+    m = text.attr('style').match(/inline-size:(\d+.\d+)/);
+    const areaW = m ? parseFloat(m[1]) / mmppx : 100 / mmppx
+    areaH = areaH ? areaH : 12 / mmppx
+
+    const lineHeight = 1.2
     let logicalLines;
     while (true) {
-	let maxRows = Math.floor((rect.attr('height') - (2 * paddingY)) / (fontSize * lineHeight))
-	let maxColumns = Math.floor((rect.attr('width') - (2 * paddingX)) / fontSize) // doesn't care about proportional font
+	let maxRows = Math.floor(areaH / (fontSize * lineHeight))
+	let maxColumns = Math.floor(areaW / fontSize) // doesn't care about proportional font
 
        logicalLines = []
        physicalLines.forEach(line => {
@@ -54,32 +41,28 @@ export default (textArea, opt) => {
 	}
     }
     console.log(`fontSize: ${fontSize}, logicalLines.length: ${logicalLines.length}`)
-    let height = fontSize * lineHeight * (logicalLines.length - 1) + fontSize;
-    console.log(`rect.height: ${rect.attr('height')}, height: ${height}`)
-    let dh = rect.attr('height') - height
+    //let height = fontSize * lineHeight * (logicalLines.length - 1) + fontSize;
+    let height = fontSize * lineHeight * logicalLines.length
+    let dh = areaH - height 
     console.log(`dh: ${dh}`)
-
     let adjustY = fontSize - originalFontSize  //for top
-    let startY = paddingY   
-    if (opt.aligny && !opt.aligny.includes('t')) {
-        startY = 0.0
-        if (opt.aligny.includes('c'))
-            adjustY = fontSize - originalFontSize + dh / 2 - (logicalLines.length - 1) * (fontSize - originalFontSize) / 2 //for center
-        else if (opt.aligny.includes('b'))
-            adjustY = fontSize - originalFontSize + dh  - paddingY * 2//for bottom
+    if (opt.align && !opt.align.includes('t')) {
+        if (opt.align.includes('c'))
+            adjustY += dh / 2 //for center
+        else if (opt.align.includes('b'))
+            adjustY += dh //for bottom
      }
 
     fixTextTransform(text)
 
-    let style = text.attr("style")
-    text.attr("style", style.replace(/font-size:\d+px/, "font-size:" + fontSize + "px"))
+    text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * mmppx}px`))
+    text.attr("style", text.attr('style').replace(/line-height:.*?;/, 'line-height:${lineHeight};'))
+    console.log(text.attr('style'))
     text.empty();
-    
-    const x = paddingX
+
+    const x = 0.0
     logicalLines.forEach((line, i) => {
-	//const y = adjustY + fontSize * (paddingY + (i * lineHeight))
-	//text.append(`<tspan x="${x}" y="${y}">${line}</tspan>`)
-       const y = startY + adjustY + fontSize * lineHeight * i
-	$(`<tspan x="${x}" y="${y}">${line}</tspan>`).appendTo(text)
+       const y = adjustY + fontSize * lineHeight * i
+	$(`<tspan x="${x * mmppx}" y="${y * mmppx}">${line}</tspan>`).appendTo(text)
     })
 }
