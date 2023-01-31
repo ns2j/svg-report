@@ -1,17 +1,17 @@
 'use strict'
 import jQuery from 'jquery'
+import {MMPPX, NINETYSIX_DPI} from './utility/const' 
 
 const $ = jQuery
 
 export default (text, opt, paperPixelRatio = 1) => {
-  const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
   if (!opt) opt = {}
   const boundingClientRectWidth = text[0].getBoundingClientRect().width
 
   let m = text.attr('style').match(/font-size:(.*?)px/)
-  const originalFontSize = m ? parseFloat(m[1]) / 1.3333 / mmppx : 4.2333 / mmppx
-  if (opt && opt.fontSize) {
-    text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${opt.fontSize * 1.3333 * mmppx}px`))
+  const originalFontSize = m ? parseFloat(m[1]) / NINETYSIX_DPI / MMPPX : 4.2333 / MMPPX
+  if (opt.fontSize) {
+    text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${opt.fontSize * NINETYSIX_DPI * MMPPX}px`))
     console.log(`originalFonSize: ${originalFontSize}, opt.fontSize: ${opt.fontSize}}`)
   } 
 
@@ -22,7 +22,7 @@ export default (text, opt, paperPixelRatio = 1) => {
     m = text.attr('style').match(/inline-size:(\d+.\d+)/)
     textLength = m ? parseFloat(m[1]) : 10.0;
    }
-   const areaW = textLength / mmppx
+   const areaW = textLength / MMPPX
                 
   console.log(`textLength: ${textLength}`)
 
@@ -61,13 +61,13 @@ console.log(areaW)
    if (opt.align === 'm') {
         //text.attr('transform', getMatrix(text.attr('transform'), areaW / 2 - textW / 2, 0))
 //        text.attr('transform', getMatrix(text.attr('transform'), areaW / 2, 0))
-        text.attr('transform', `translate(${areaW / 2 * mmppx}, 0)`)
+        text.attr('transform', `translate(${areaW / 2 * MMPPX}, 0)`)
         textAnchor = 'middle'     
    }
 
     if (opt.align === 'e') {
         //text.attr('transform', getMatrix(text.attr('transform'), areaW , 0))
-        text.attr('transform', `translate(${areaW * mmppx}, 0)`)
+        text.attr('transform', `translate(${areaW * MMPPX}, 0)`)
         textAnchor = 'end'     
     }
 

@@ -3,25 +3,25 @@
 import jQuery from 'jquery'
 import splitStringByWidth from './utility/split-string-by-width'
 import fixTextTransform from './utility/fix-text-transform'
+import {MMPPX, NINETYSIX_DPI} from './utility/const'
 
 const $ = jQuery
 
 export default (text, areaH, opt) => {
-    const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
     console.log(opt);
     if (!opt) opt = {}
     
     let m = text.attr("style").match(/font-size:(.*?)px/)
-    let originalFontSize = m ? parseFloat(m[1]) / mmppx : 4.9389 / mmppx
-    let fontSize = opt.fontSize ? opt.fontSize * 1.3333 : originalFontSize
+    let originalFontSize = m ? parseFloat(m[1]) / MMPPX : 4.9389 / MMPPX
+    let fontSize = opt.fontSize ? opt.fontSize * NINETYSIX_DPI : originalFontSize
     console.log(fontSize)
     
     // find the right-size font-size
     const physicalLines = text.text().split("\n")
     console.log(physicalLines)
     m = text.attr('style').match(/inline-size:(\d+.\d+)/);
-    const areaW = m ? parseFloat(m[1]) / mmppx : 100 / mmppx
-    areaH = areaH ? areaH : 12 / mmppx
+    const areaW = m ? parseFloat(m[1]) / MMPPX : 100 / MMPPX
+    areaH = areaH ? areaH : 12 / MMPPX
 
     const lineHeight = 1.2
     let logicalLines;
@@ -55,7 +55,7 @@ export default (text, areaH, opt) => {
 
     fixTextTransform(text)
 
-    text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * mmppx}px`))
+    text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * MMPPX}px`))
     text.attr("style", text.attr('style').replace(/line-height:.*?;/, 'line-height:${lineHeight};'))
     console.log(text.attr('style'))
     text.empty();
@@ -63,6 +63,6 @@ export default (text, areaH, opt) => {
     const x = 0.0
     logicalLines.forEach((line, i) => {
        const y = adjustY + fontSize * lineHeight * i
-	$(`<tspan x="${x * mmppx}" y="${y * mmppx}">${line}</tspan>`).appendTo(text)
+	$(`<tspan x="${x * MMPPX}" y="${y * MMPPX}">${line}</tspan>`).appendTo(text)
     })
 }

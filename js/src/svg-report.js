@@ -3,6 +3,8 @@
 import jQuery from 'jquery'
 import adjustText from './adjust-text.js'
 import adjustTextarea from './adjust-textarea.js'
+import {MMPPX} from './utility/const'
+
 const $ = jQuery
 
 function makeMap(svg) {
@@ -23,10 +25,9 @@ function makeMap(svg) {
 }  
 
 function getAreaHeight(text) {
-  const mmppx = 0.26458333 //mm per px (inkscape use 96dpi)
   const style = text.attr('style')
   let m = style.match(/font-size:(.*?)px/)
-  const fontSize = m ? parseFloat(m[1]) / mmppx : 4.2333 / mmppx
+  const fontSize = m ? parseFloat(m[1]) / MMPPX : 4.2333 / MMPPX
   m = style.match(/line-height:(\d+.\d+)/)
   const lineHeight = m ? parseFloat(m[1]) : 1.25;
   console.log(`lineHeight: ${lineHeight}`)
