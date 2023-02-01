@@ -18,7 +18,13 @@ export default (text, opt) => {
     textLength = opt.width
   } else {
     let m = text.attr('style').match(/inline-size:(\d+.\d+)/)
-    textLength = m ? parseFloat(m[1]) : 10.0;
+    if (m) {
+      textLength = parseFloat(m[1])
+    } else if (opt.align === 's') {
+      return
+    } else {
+      textLength = 10.0
+    }
   }
   text.attr('style', text.attr('style').replace(/inline-size:.*?;/, ';'))
   console.log(`textLength: ${textLength}`)
