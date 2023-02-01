@@ -18,13 +18,12 @@ export default (text, opt) => {
     textLength = opt.width
   } else {
     let m = text.attr('style').match(/inline-size:(\d+.\d+)/)
-    if (m) {
+    if (m)
       textLength = parseFloat(m[1])
-    } else if (opt.align === 's') {
+    else if (opt.align === 's')
       return
-    } else {
+    else
       textLength = 10.0
-    }
   }
   text.attr('style', text.attr('style').replace(/inline-size:.*?;/, ';'))
   console.log(`textLength: ${textLength}`)
@@ -34,9 +33,6 @@ export default (text, opt) => {
     
   console.log(`boundingClientRectWidth: ${boundingClientRectWidth}`)
   if (boundingClientRectWidth * MMPPX > textLength) {
-    tspan.attr('textLength', textLength)
-    tspan.attr('lengthAdjust', 'spacingAndGlyphs')
-    //for firefox
     text.attr('textLength', textLength)
     text.attr('lengthAdjust', 'spacingAndGlyphs')
   }
