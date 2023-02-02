@@ -36,17 +36,6 @@ function getAreaHeight(text) {
   return lineCount * lineHeight * fontSize;
 }
 
-function changeIdAll(svgId) {
-    let svg = $('#svgreport').find("#" + svgId);
-    console.log(svg);
-    let re = /(^id|\s+id)="(.+?)(">|"\s|"$)/g
-    let newId = svg.html().replace(re, ' id="$2_'+ svgId + '$3')
-    re = /shape-inside:url\((#.+?)\);/g;
-    newId = newId.replace(re, 'shape-inside:url($1_' + svgId + ');');
-    //console.log(newId)
-    svg.html(newId);
-}
-
 function setNoPrint(p, selector) {
     if (p.is(selector))
         return
@@ -75,16 +64,12 @@ export class SvgReport {
     
     doRender(obj) {
         console.log(obj);
-        if(Array.isArray(obj)) {
-            for (var i in obj)
-                this.renderEach($(this.selector), obj[i], i)
-        } else {
-            this.renderEach($(this.selector), obj, 0)
-        }
-        $('body').children().each((i, e) => setNoPrint($(e), this.selector))
+        const objs = Array.isArray(obj) ? obj : [obj];
+        this.renderEach($(this.selector), objs, 0)
     }
 
-    renderEach(svgArea, svgRecipe, i) {
+    renderEach(svgArea, svgRecipes, i) {
+      const svgRecipe = svgRecipes[i]
       $.get(svgRecipe['svgUrl'])
       .done((data) => {
         const svg = $(data.rootElement)
@@ -96,10 +81,10 @@ export class SvgReport {
         this.svgdivs.push(svgdiv)
         svgdiv.append(svg)
         svgArea.append(svgdiv)
-        changeIdAll(svgId)
 
-        const viewBoxWidth = svgArea.attr('viewBox')?.split(/ +/)[2] ?? null
+        const viewBoxWidth = svg.attr('viewBox')?.split(/ +/)[2] ?? null
         const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
+        console.log(`paperPixelRatio: ${paperPixelRatio}`)
 
         const map = makeMap(svg)
         console.log(map)
@@ -110,15 +95,12 @@ export class SvgReport {
           const v = value['value']
           const o = value['opt']
           for (let text of map[ph]) {
-            const areaH = getAreaHeight(text)
-            console.log(`areaH: ${areaH}`)
+            const areaH = getAreaHeight(text) //save area height
             const tspan = $(text.find('tspan')[0])
             text.empty();
             text.append(tspan);
             text.children(0).text(v ? v : "")
             console.log(text.text())
-            console.log(text.attr("id"))
-            console.log(text.attr("transform"))
  
             if (o && o.align && o.align.match(/[TMB]/))
                adjustTextarea(text, areaH, o)
@@ -126,7 +108,12 @@ export class SvgReport {
                adjustText(text, o, paperPixelRatio)
            }
          }
-        $('#' + svgId).replaceWith($('#' + svgId).prop('outerHTML'));
+        console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
+        i++;
+        if (i < svgRecipes.length) //loop continue
+            this.renderEach(svgArea, svgRecipes, i)
+        else  //loop end
+            $('body').children().each((i, e) => setNoPrint($(e), this.selector))
      })
      .fail((xhr, textStatus, error) => {
         console.log(xhr)
