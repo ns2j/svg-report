@@ -108,7 +108,9 @@ export class SvgReport {
                adjustText(text, o, paperPixelRatio)
            }
          }
-        svg.replaceWith(svg.prop('outerHTML'));
+        
+        svg.replaceWith(svg.prop('outerHTML'))
+        
         console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
         i++;
         if (i < svgRecipes.length) //loop continue
