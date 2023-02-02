@@ -4,14 +4,28 @@ import {MMPPX, NINETYSIX_DPI} from './utility/const'
 
 const $ = jQuery
 
+function addTranslate(text, x, y) {
+  let transform = text.attr("transform")
+  if (!transform) return `translate(${x}, ${y})`
+    
+  let dx = 0
+  let dy = 0
+  let match = transform.match(/translate\((.*),(.*)\)/)
+  if (match) {
+    dx = parseFloat(match[1])
+    dy = parseFloat(match[2])
+  }    
+
+  text.attr('transform', `translate(${x + dx}, ${y + dy})`)
+}
+
 export default (text, opt, paperPixelRatio) => {
   if (!opt) opt = {}
   const boundingClientRectWidth = text[0].getBoundingClientRect().width
 
-//  let m = text.attr('style').match(/font-size:(.*?)px/)
   if (opt.fontSize)
     text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${opt.fontSize * NINETYSIX_DPI * MMPPX}px`))
-  console.log(`opt.fontSize: ${opt.fontSize}}`)
+  console.log(`opt.fontSize: ${opt.fontSize}`)
 
   let textLength
   if (opt.width) {
@@ -40,11 +54,11 @@ export default (text, opt, paperPixelRatio) => {
 
   switch(opt.align) {
     case 'm':
-      text.attr('transform', `translate(${textLength / 2}, 0)`)
+      addTranslate(text, textLength / 2, 0)
       text.attr('text-anchor', 'middle')
       break;
     case 'e':
-      text.attr('transform', `translate(${textLength}, 0)`)
+      addTranslate(text, textLength , 0)
       text.attr('text-anchor', 'end')
       break;
     default:
