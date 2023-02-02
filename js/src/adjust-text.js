@@ -6,7 +6,10 @@ const $ = jQuery
 
 function addTranslate(text, x, y) {
   let transform = text.attr("transform")
-  if (!transform) return `translate(${x}, ${y})`
+  if (!transform) {
+    text.attr('transform', `translate(${x}, ${y})`)
+    return
+  }
     
   let dx = 0
   let dy = 0
