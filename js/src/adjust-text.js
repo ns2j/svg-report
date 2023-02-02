@@ -4,7 +4,7 @@ import {MMPPX, NINETYSIX_DPI} from './utility/const'
 
 const $ = jQuery
 
-export default (text, opt) => {
+export default (text, opt, paperPixelRatio) => {
   if (!opt) opt = {}
   const boundingClientRectWidth = text[0].getBoundingClientRect().width
 
@@ -32,7 +32,7 @@ export default (text, opt) => {
   text.empty()
     
   console.log(`boundingClientRectWidth: ${boundingClientRectWidth}`)
-  if (boundingClientRectWidth * MMPPX > textLength) {
+  if (boundingClientRectWidth* paperPixelRatio * MMPPX > textLength) {
     text.attr('textLength', textLength)
     text.attr('lengthAdjust', 'spacingAndGlyphs')
   }
