@@ -7,8 +7,14 @@ import {MMPPX, NINETYSIX_DPI} from './utility/const'
 const $ = jQuery
 
 function fixTextTransform(text) {
+  const x = parseFloat(text.attr("x"))
+  const y = parseFloat(text.attr("y"))
   let transform = text.attr("transform")
-  if (!transform) return
+  if (!transform) {
+    //text.attr('transform', `translate(,0})`)
+    //return
+    transform = ""
+  }
 
   let dx = 0
   let dy = 0
@@ -20,19 +26,18 @@ function fixTextTransform(text) {
   //console.log(`dx: ${dx}`)
   //console.log(`dy: ${dy}`)
     
-  let x = parseFloat(text.attr("x"))
-  let y = parseFloat(text.attr("y"))
   //text.attr("transform", `matrix(1, 0, 0, 1, ${x + dx}, ${y + dy})`)text.attr("transform", `matrix(1, 0, 0, 1, ${x + dx}, ${y + dy})`)
   text.attr('transform', `translate(${x + dx}, ${y + dy})`)
   text.attr('x', 0)
   text.attr('y', 0)
 }
 
-export default (text, areaH, opt) => {
+export default (text, area, opt) => {
     console.log(opt);
+    console.log(area)
     if (!opt) opt = {}
     
-    areaH = opt.height ? opt.height / MMPPX : areaH
+    let areaH = opt.height ? opt.height / MMPPX : area.height
     
     let m = text.attr("style").match(/font-size:(.*?)px/)
     let originalFontSize = m ? parseFloat(m[1]) / MMPPX : 4.9389 / MMPPX
@@ -41,8 +46,7 @@ export default (text, areaH, opt) => {
     
     const physicalLines = text.text().split("\n")
     console.log(physicalLines)
-    m = text.attr('style').match(/inline-size:(\d+.\d+)/);
-    const areaW = m ? parseFloat(m[1]) / MMPPX : 100 / MMPPX
+    const areaW = area.width ? area.width : 100 / MMPPX
     areaH = areaH ? areaH : 12 / MMPPX
 
     // find the right-size font-size

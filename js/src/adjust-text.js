@@ -22,7 +22,7 @@ function addTranslate(text, x, y) {
   text.attr('transform', `translate(${x + dx}, ${y + dy})`)
 }
 
-export default (text, opt, paperPixelRatio) => {
+export default (text, area, opt, paperPixelRatio) => {
   if (!opt) opt = {}
   const boundingClientRectWidth = text[0].getBoundingClientRect().width
 
@@ -34,9 +34,8 @@ export default (text, opt, paperPixelRatio) => {
   if (opt.width) {
     textLength = opt.width
   } else {
-    let m = text.attr('style').match(/inline-size:(\d+.\d+)/)
-    if (m)
-      textLength = parseFloat(m[1])
+    if (area.width)
+      textLength = area.width
     else if (opt.align === 's')
       return
     else

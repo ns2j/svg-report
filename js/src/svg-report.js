@@ -7,6 +7,33 @@ import {MMPPX} from './utility/const'
 
 const $ = jQuery
 
+function getAreaHeight(text) {
+  const style = text.attr('style')
+  let m = style.match(/font-size:(.*?)px/)
+  const fontSize = m ? parseFloat(m[1]) / MMPPX : 4.2333 / MMPPX
+  m = style.match(/line-height:(\d+.\d+)/)
+  const lineHeight = m ? parseFloat(m[1]) : 1.25;
+  console.log(`lineHeight: ${lineHeight}`)
+  const lineCount = text.find('tspan').length
+  console.log(`lineCount: ${lineCount}`)
+  return lineCount * lineHeight * fontSize;
+}
+
+function getRect(text) {
+  let s = text.attr('style');
+  let m = s.match(/shape-inside:url\((.*?)\)/)
+  if (m) {
+    let rect = $(m[1])
+    return {"width": parseFloat(rect.attr('width')),
+     "height": parseFloat(rect.attr('height'))}
+  }
+  const h = getAreaHeight(text)
+  m = text.attr('style').match(/inline-size:(\d+.\d+)/);
+  const w = m ? parseFloat(m[1]) / MMPPX : null 
+    
+  return {"width": w, "height": h}
+}
+
 function makeMap(svg) {
   const map = {}
   const texts = svg.find("text")
@@ -18,22 +45,63 @@ function makeMap(svg) {
       let ph = m[1]
       if (!map[ph])
         map[ph] = []
-      map[ph].push(text)
+      map[ph].push({"text": text, "area" : getRect(text)})
      }
   })
   return map
 }  
 
-function getAreaHeight(text) {
-  const style = text.attr('style')
-  let m = style.match(/font-size:(.*?)px/)
-  const fontSize = m ? parseFloat(m[1]) / MMPPX : 4.2333 / MMPPX
-  m = style.match(/line-height:(\d+.\d+)/)
-  const lineHeight = m ? parseFloat(m[1]) : 1.25;
-  console.log(`lineHeight: ${lineHeight}`)
-  const lineCount = text.find('tspan').length
-  console.log(`lineCount: ${lineCount}`)
-  return lineCount * lineHeight * fontSize;
+function fixTransform(text) {
+  let scale = 1.0
+  let dx = 0.0
+  let dy = 0.0
+  const transform = text.attr('transform')
+  if (!transform) return
+         
+  let m = transform.match(/scale\((\d+.\d+)\)/)
+  if (m)
+    scale = parseFloat(m[1])
+  else {
+    m = transform.match(/matrix\((.*),(.*),(.*),(.*),(.*),(.*)\)/)
+    if (m) {
+      scale = parseFloat(m[1])
+      dx = parseFloat(m[5])
+      dy = parseFloat(m[6])
+    } else {
+      m = transform.match(/translate\((.*),(.*)\)/)
+      if (m) {
+        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA")
+        dx = parseFloat(m[1])  
+        dy = parseFloat(m[2])  
+      }
+    }
+  }
+  console.log(`scale: ${scale}, dx: ${dx}, dy: ${dy}`)
+  m = text.attr('style').match(/font-size:(.*?)px/)
+  if (m) {
+        console.log('dsfaaaaaaaaaaaaaaajkl;kj')
+    const fontSize = parseFloat(m[1]) * scale
+    console.log(`fontSize: ${fontSize}`)
+    text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize}px`))
+    console.log(text.attr('style'))
+  }
+  let x = 0
+  let y = 0
+  let tspan = $(text.find('tspan')[0])
+  if (!text.attr('x')) {
+    x = parseFloat(tspan.attr('x')) * scale
+    y = parseFloat(tspan.attr('y')) * scale
+  } else {
+    x = parseFloat(text.attr('x')) * scale
+    y = parseFloat(text.attr('y')) * scale
+  }
+  
+  console.log(`x: ${x}, y: ${y}`)
+  text.attr('transform', `translate(${x + dx}, ${y + dy})`)
+  tspan.attr('x', '0')
+  tspan.attr('y', '0') 
+  text.attr('x', '0')
+  text.attr('y', '0') 
 }
 
 function setNoPrint(p, selector) {
@@ -94,8 +162,9 @@ export class SvgReport {
           if (!value) continue
           const v = value['value']
           const o = value['opt']
-          for (let text of map[ph]) {
-            const areaH = getAreaHeight(text) //save area height
+          for (let item of map[ph]) {
+            const text = item.text
+            fixTransform(text)
             const tspan = $(text.find('tspan')[0])
             text.empty();
             text.append(tspan);
@@ -103,9 +172,9 @@ export class SvgReport {
             console.log(text.text())
  
             if (o && o.align && o.align.match(/[TMB]/))
-               adjustTextarea(text, areaH, o)
+               adjustTextarea(text, item.area, o)
             else
-               adjustText(text, o, paperPixelRatio)
+               adjustText(text, item.area, o, paperPixelRatio)
            }
          }
         
