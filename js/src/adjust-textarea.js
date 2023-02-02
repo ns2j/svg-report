@@ -62,12 +62,11 @@ export default (text, areaH, opt) => {
 
     text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * MMPPX}px`))
     text.attr("style", text.attr('style').replace(/line-height:.*?;/, `line-height:${lineHeight};`))
-    console.log(text.attr('style'))
-    text.empty();
+    text.empty()
 
     const x = 0.0
     logicalLines.forEach((line, i) => {
        const y = adjustY + fontSize * lineHeight * i
 	$(`<tspan x="${x * MMPPX}" y="${y * MMPPX}">${line}</tspan>`).appendTo(text)
     })
-}
+} 
