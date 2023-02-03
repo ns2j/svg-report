@@ -19,11 +19,11 @@ function getAreaHeight(text) {
   return lineCount * lineHeight * fontSize;
 }
 
-function getRect(text) {
+function getRect(svg, text) {
   let s = text.attr('style');
   let m = s.match(/shape-inside:url\((.*?)\)/)
   if (m) {
-    let rect = $(m[1])
+    let rect = svg.find(m[1])
     return {"width": parseFloat(rect.attr('width')),
      "height": parseFloat(rect.attr('height'))}
   }
@@ -45,7 +45,7 @@ function makeMap(svg) {
       let ph = m[1]
       if (!map[ph])
         map[ph] = []
-      map[ph].push({"text": text, "area" : getRect(text)})
+      map[ph].push({"text": text, "area" : getRect(svg, text)})
      }
   })
   return map
@@ -55,8 +55,8 @@ function fixTransform(text) {
   let scale = 1.0
   let dx = 0.0
   let dy = 0.0
-  const transform = text.attr('transform')
-  if (!transform) return
+  let transform = text.attr('transform')
+  if (!transform) transform = ""
          
   let m = transform.match(/scale\((\d+.\d+)\)/)
   if (m)
@@ -70,7 +70,6 @@ function fixTransform(text) {
     } else {
       m = transform.match(/translate\((.*),(.*)\)/)
       if (m) {
-        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA")
         dx = parseFloat(m[1])  
         dy = parseFloat(m[2])  
       }
@@ -79,7 +78,6 @@ function fixTransform(text) {
   console.log(`scale: ${scale}, dx: ${dx}, dy: ${dy}`)
   m = text.attr('style').match(/font-size:(.*?)px/)
   if (m) {
-        console.log('dsfaaaaaaaaaaaaaaajkl;kj')
     const fontSize = parseFloat(m[1]) * scale
     console.log(`fontSize: ${fontSize}`)
     text.attr('style', text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize}px`))
@@ -87,7 +85,7 @@ function fixTransform(text) {
   }
   let x = 0
   let y = 0
-  let tspan = $(text.find('tspan')[0])
+  let tspan = text.find('tspan').first()
   if (!text.attr('x')) {
     x = parseFloat(tspan.attr('x')) * scale
     y = parseFloat(tspan.attr('y')) * scale
@@ -165,7 +163,7 @@ export class SvgReport {
           for (let item of map[ph]) {
             const text = item.text
             fixTransform(text)
-            const tspan = $(text.find('tspan')[0])
+            const tspan = text.find('tspan').first()
             text.empty();
             text.append(tspan);
             text.children(0).text(v ? v : "")

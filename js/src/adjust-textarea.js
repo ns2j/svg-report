@@ -6,32 +6,6 @@ import {MMPPX, NINETYSIX_DPI} from './utility/const'
 
 const $ = jQuery
 
-function fixTextTransform(text) {
-  const x = parseFloat(text.attr("x"))
-  const y = parseFloat(text.attr("y"))
-  let transform = text.attr("transform")
-  if (!transform) {
-    //text.attr('transform', `translate(,0})`)
-    //return
-    transform = ""
-  }
-
-  let dx = 0
-  let dy = 0
-  let match = transform.match(/translate\((.*),(.*)\)/)
-  if (match) {
-    dx = parseFloat(match[1])
-    dy = parseFloat(match[2])
-  }    
-  //console.log(`dx: ${dx}`)
-  //console.log(`dy: ${dy}`)
-    
-  //text.attr("transform", `matrix(1, 0, 0, 1, ${x + dx}, ${y + dy})`)text.attr("transform", `matrix(1, 0, 0, 1, ${x + dx}, ${y + dy})`)
-  text.attr('transform', `translate(${x + dx}, ${y + dy})`)
-  text.attr('x', 0)
-  text.attr('y', 0)
-}
-
 export default (text, area, opt) => {
     console.log(opt);
     console.log(area)
@@ -82,8 +56,6 @@ export default (text, area, opt) => {
       default:
         break;       
     }
-
-    fixTextTransform(text)
 
     text.attr("style", text.attr('style').replace(/font-size:.*?px/, `font-size:${fontSize * MMPPX}px`))
     text.attr("style", text.attr('style').replace(/line-height:.*?;/, `line-height:${lineHeight};`))
