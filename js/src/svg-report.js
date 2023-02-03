@@ -176,7 +176,7 @@ export class SvgReport {
            }
          }
         
-        svg.replaceWith(svg.prop('outerHTML'))
+        //svg.replaceWith(svg.prop('outerHTML'))
         
         console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
         i++;

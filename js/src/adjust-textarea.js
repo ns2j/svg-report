@@ -65,6 +65,7 @@ export default (text, area, opt) => {
     const x = 0.0
     logicalLines.forEach((line, i) => {
        const y = adjustY + fontSize * lineHeight * i
-	$(`<tspan x="${x * MMPPX}" y="${y * MMPPX}">${line}</tspan>`).appendTo(text)
+       $(`<tspan x="${x * MMPPX}" y="${y * MMPPX}">${line}</tspan>`).appendTo(text)
     })
+    text.html(text.html())
 } 
