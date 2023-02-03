@@ -35,7 +35,7 @@ export default (text, area, opt, paperPixelRatio) => {
     textLength = opt.width
   } else {
     if (area.width)
-      textLength = area.width
+      textLength = area.width * MMPPX
     else if (opt.align === 's')
       return
     else

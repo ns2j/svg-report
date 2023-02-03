@@ -20,7 +20,8 @@ export default (text, area, opt) => {
     
     const physicalLines = text.text().split("\n")
     console.log(physicalLines)
-    const areaW = area.width ? area.width : 100 / MMPPX
+    let areaW = opt.width ? opt.width / MMPPX : area.width
+    areaW = areaW ? areaW : 100 / MMPPX
     areaH = areaH ? areaH : 12 / MMPPX
 
     // find the right-size font-size
