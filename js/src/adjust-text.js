@@ -44,11 +44,14 @@ export default (text, area, opt, paperPixelRatio) => {
   text.attr('style', text.attr('style').replace(/inline-size:.*?;/, ';'))
   console.log(`textLength: ${textLength}`)
 
-  const tspan = $(text.find('tspan')[0])
+  const tspan = text.find('tspan').first()
   text.empty()
     
   console.log(`boundingClientRectWidth: ${boundingClientRectWidth}`)
   if (boundingClientRectWidth* paperPixelRatio * MMPPX > textLength) {
+    tspan.attr('textLength', textLength)
+    tspan.attr('lengthAdjust', 'spacingAndGlyphs')
+
     text.attr('textLength', textLength)
     text.attr('lengthAdjust', 'spacingAndGlyphs')
   }
