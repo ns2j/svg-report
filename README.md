@@ -1,4 +1,8 @@
 # svg-report   
+Original idea is [svg-paper](https://github.com/ttskch/svg-paper)   
+This is javascript library merging value to svg template file.   
+This can be same web browser's looks and printing looks.   
+
 ## build   
 npm install   
 npm run build:prod   
