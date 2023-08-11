@@ -1,28 +1,25 @@
 {
   "name": "svg-report",
   "version": "0.0.11",
-  "description": "The world's most maintainable way to create paper-printable documents 🖨💘",
-  "homepage": "https://github.com/ttskch/svg-paper",
+  "description": "ceate paper-printable documents",
+  "homepage": "https://github.com/ns2j/svg-report",
   "bugs": {
-    "url": "https://github.com/ttskch/svg-paper/issues"
+    "url": "https://github.com/ns2j/svg-report/issues"
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com/ttskch/svg-paper"
+    "url": "ssh://git@github.com/ns2j/svg-report"
   },
   "author": {
-    "name": "Takashi Kanemoto",
-    "email": "ttskch@gmail.com"
+    "name": "igari",
+    "email": "igari.y@gmail.com"
   },
   "main": "dist/svg-report.js",
   "style": "dist/svg-report.css",
   "sass": "scss/js/svg-report.scss",
   "keywords": [
     "svg",
-    "pdf",
-    "pdf-generation",
-    "adobe-xd",
-    "figma",
+    "inkscape",
     "a4"
   ],
   "scripts": {
@@ -42,14 +39,14 @@
     "css-loader": "^5.2.6",
     "jest": "^26.1.0",
     "mini-css-extract-plugin": "^1.6.0",
-    "node-sass": "^6.0.0",
+    "node-sass": "^9.0.0",
     "postcss": "^8.3.1",
     "postcss-loader": "^4.3.0",
-    "sass-loader": "^10.2.0",
+    "sass-loader": "^13.3.2",
     "string-width": "^4.2.2",
     "terser-webpack-plugin": "^4.2.3",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^4.10.0",
+    "webpack": "^5.46.0",
+    "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.10.0"
   },
   "license": "MIT",
