@@ -187,10 +187,9 @@ export class SvgReport {
     }
 
     select(index) {
-        //        this.svgdivs[index].addClass('noscreen')
         for (let i in this.svgdivs) {
             let d = this.svgdivs[i]
-            if (i == index)
+            if (index < 0 || i == index)
                 d.removeClass('noscreen')
             else 
                 d.addClass('noscreen')
@@ -199,6 +198,10 @@ export class SvgReport {
 
     show(index) {
         this.svgdivs[index].removeClass('noscreen')
+    }
+    
+    getNumPage() {
+      return this.svgdivs.length
     }
 }
 
