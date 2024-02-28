@@ -166,7 +166,7 @@ export class SvgReport {
             const tspan = text.find('tspan').first()
             text.empty();
             text.append(tspan);
-            text.children(0).text(v ? v : "")
+            text.children(0).text(v ?? "")
             console.log(text.text())
  
             if (o && o.align && o.align.match(/[TMB]/))
