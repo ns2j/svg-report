@@ -130,25 +130,30 @@ export class SvgReport {
         }
     }
     
-    doRender(obj) {
-        console.log(obj);
-        const objs = Array.isArray(obj) ? obj : [obj];
-        this.renderEach($(this.selector), objs, 0)
-    }
-
-    async renderEach(svgArea, svgRecipes, i) {
-      const svgRecipe = svgRecipes[i]
+    async createSvg(svgRecipe, index) {
       const res = await fetch(svgRecipe['svgUrl'])
       const svg = $(await res.text())
       const r = (Math.random() + 1).toString(36).substring(7)
-      const svgId = r + "_svg_" + i
+      const svgId = r + "_svg_" + index
       console.log(svgId)
       svg.attr('id', svgId) 
       const svgdiv = $("<div></div>");  //need to avoid extra blank page for chrome
       this.svgdivs.push(svgdiv)
       svgdiv.append(svg)
-      svgArea.append(svgdiv)
+      $(this.selector).append(svgdiv)
+      return svg;
+    }
+    
+    doRender(obj) {
+      console.log(obj);
+      const svgRecipes = Array.isArray(obj) ? obj : [obj];
+      svgRecipes.forEach(async (svgRecipe,i) => {
+        this.renderEach(await this.createSvg(svgRecipe, i), svgRecipe)
+      })
+      $('body').children().each((i, e) => setNoPrint($(e), this.selector))
+    }
 
+    renderEach(svg, svgRecipe) {
       const viewBoxWidth = svg.attr('viewBox')?.split(/ +/)[2] ?? null
       const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
       console.log(`paperPixelRatio: ${paperPixelRatio}`)
@@ -179,12 +184,6 @@ export class SvgReport {
         
       //svg.replaceWith(svg.prop('outerHTML'))
         
-      console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
-      i++;
-      if (i < svgRecipes.length) //loop continue
-        this.renderEach(svgArea, svgRecipes, i)
-      else  //loop end
-        $('body').children().each((i, e) => setNoPrint($(e), this.selector))
     }
 
     select(index) {
