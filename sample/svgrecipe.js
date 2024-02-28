@@ -81,6 +81,8 @@ router.get('/', (req, res) => {
   "holderMap": {
     "%no1%": { "value": "1" },
     "%name1%": { "value": "商品a12"},
+    "%price1%": { "value": "1,000", "opt": {"align": "e"}},
+    "%comment1%": { "value": "some\n comment", "opt": {"align": "T"}}, 
     "%no2%": { "value": "2" },
     "%name2%": { "value": "商品a11aaaaaaa", "opt": {"width": 15}},
     "%no3%": { "value": "3" },
