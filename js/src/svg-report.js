@@ -139,54 +139,53 @@ export class SvgReport {
     async renderEach(svgArea, svgRecipes, i) {
       const svgRecipe = svgRecipes[i]
       const res = await fetch(svgRecipe['svgUrl'])
+      const svg = $(await res.text())
+      const r = (Math.random() + 1).toString(36).substring(7)
+      const svgId = r + "_svg_" + i
+      console.log(svgId)
+      svg.attr('id', svgId) 
+      const svgdiv = $("<div></div>");  //need to avoid extra blank page for chrome
+      this.svgdivs.push(svgdiv)
+      svgdiv.append(svg)
+      svgArea.append(svgdiv)
 
-        const svg = $(await res.text())
-        const r = (Math.random() + 1).toString(36).substring(7)
-        const svgId = r + "_svg_" + i
-        console.log(svgId)
-        svg.attr('id', svgId) 
-        const svgdiv = $("<div></div>");  //need to avoid extra blank page for chrome
-        this.svgdivs.push(svgdiv)
-        svgdiv.append(svg)
-        svgArea.append(svgdiv)
+      const viewBoxWidth = svg.attr('viewBox')?.split(/ +/)[2] ?? null
+      const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
+      console.log(`paperPixelRatio: ${paperPixelRatio}`)
 
-        const viewBoxWidth = svg.attr('viewBox')?.split(/ +/)[2] ?? null
-        const paperPixelRatio = viewBoxWidth ? parseFloat(viewBoxWidth) / 0.254 / svgArea[0].getBoundingClientRect().width : 1
-        console.log(`paperPixelRatio: ${paperPixelRatio}`)
-
-        const map = makeMap(svg)
-        console.log(map)
-        for (let ph in map) {
-          console.log(svgRecipe['holderMap'][ph])
-          const value = svgRecipe['holderMap'][ph]
-          if (!value) continue
-          const v = value['value']
-          const o = value['opt']
-          for (let item of map[ph]) {
-            const text = item.text
-            fixTransform(text)
-            const tspan = text.find('tspan').first()
-            text.empty();
-            text.append(tspan);
-            text.children(0).text(v ?? "")
-            console.log(text.text())
+      const map = makeMap(svg)
+      console.log(map)
+      for (let ph in map) {
+        console.log(svgRecipe['holderMap'][ph])
+        const value = svgRecipe['holderMap'][ph]
+        if (!value) continue
+        const v = value['value']
+        const o = value['opt']
+        for (let item of map[ph]) {
+          const text = item.text
+          fixTransform(text)
+          const tspan = text.find('tspan').first()
+          text.empty();
+          text.append(tspan);
+          text.children(0).text(v ?? "")
+          console.log(text.text())
  
-            if (o && o.align && o.align.match(/[TMB]/))
-               adjustTextarea(text, item.area, o)
-            else
-               adjustText(text, item.area, o, paperPixelRatio)
-           }
-         }
+          if (o && o.align && o.align.match(/[TMB]/))
+            adjustTextarea(text, item.area, o)
+          else
+            adjustText(text, item.area, o, paperPixelRatio)
+          }
+      }
         
-        //svg.replaceWith(svg.prop('outerHTML'))
+      //svg.replaceWith(svg.prop('outerHTML'))
         
-        console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
-        i++;
-        if (i < svgRecipes.length) //loop continue
-            this.renderEach(svgArea, svgRecipes, i)
-        else  //loop end
-            $('body').children().each((i, e) => setNoPrint($(e), this.selector))
-   }
+      console.log(`i: ${i}, svgRecipes.length: ${svgRecipes.length}`)
+      i++;
+      if (i < svgRecipes.length) //loop continue
+        this.renderEach(svgArea, svgRecipes, i)
+      else  //loop end
+        $('body').children().each((i, e) => setNoPrint($(e), this.selector))
+    }
 
     select(index) {
         //        this.svgdivs[index].addClass('noscreen')
