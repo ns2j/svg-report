@@ -120,12 +120,14 @@ export class SvgReport {
         this.svgdivs = []
     }
 
-    render() {
+    async render() {
         const tmp = this.recipeUrlOrObject;
-        if (typeof tmp === "string" || tmp instanceof String)
-            $.getJSON(tmp, json => this.doRender(json))
-        else
+        if (typeof tmp === "string" || tmp instanceof String) {
+            const res = await fetch(tmp)
+            this.doRender(await res.json())   
+        } else {
             this.doRender(tmp)
+        }
     }
     
     doRender(obj) {
@@ -134,11 +136,11 @@ export class SvgReport {
         this.renderEach($(this.selector), objs, 0)
     }
 
-    renderEach(svgArea, svgRecipes, i) {
+    async renderEach(svgArea, svgRecipes, i) {
       const svgRecipe = svgRecipes[i]
-      $.get(svgRecipe['svgUrl'])
-      .done((data) => {
-        const svg = $(data.rootElement)
+      const res = await fetch(svgRecipe['svgUrl'])
+
+        const svg = $(await res.text())
         const r = (Math.random() + 1).toString(36).substring(7)
         const svgId = r + "_svg_" + i
         console.log(svgId)
@@ -184,12 +186,6 @@ export class SvgReport {
             this.renderEach(svgArea, svgRecipes, i)
         else  //loop end
             $('body').children().each((i, e) => setNoPrint($(e), this.selector))
-     })
-     .fail((xhr, textStatus, error) => {
-        console.log(xhr)
-        console.log(textStatus)
-        console.log(error)
-      }) 
    }
 
     select(index) {
