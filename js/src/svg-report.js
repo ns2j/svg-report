@@ -145,9 +145,10 @@ export class SvgReport {
   async doRender(obj) {
     console.log(obj);
     const svgRecipes = Array.isArray(obj) ? obj : [obj];
-    svgRecipes.forEach(async (svgRecipe, i) => {
-      this.renderEach(await this.createSvg(svgRecipe, i), svgRecipe)
-    })
+    for (const [i, svgRecipe] of svgRecipes.entries()) {
+      const svg = await this.createSvg(svgRecipe, i)
+      this.renderEach(svg, svgRecipe)
+    }
     Array.from(document.querySelector('body').children).forEach(e => setNoPrint(e, this.selector))
   }
 
