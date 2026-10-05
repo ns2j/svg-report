@@ -161,10 +161,10 @@ export class SvgReport {
     console.log(map)
     for (let ph in map) {
       console.log(svgRecipe['holderMap'][ph])
+
       const value = svgRecipe['holderMap'][ph]
-      if (!value) continue
-      const v = value['value']
-      const o = value['opt']
+      const v = value?.value ?? ''
+      const o = value?.opt
       for (let item of map[ph]) {
         const text = item.text
         fixTransform(text)
@@ -172,8 +172,9 @@ export class SvgReport {
         const tspan = text.querySelectorAll('tspan')[0]
         while (text.firstChild)
           text.removeChild(text.firstChild)
-        text.appendChild(tspan);
-        text.children[0].textContent = v ?? ''
+
+        text.appendChild(tspan)
+        text.children[0].textContent = v
 
         if (o?.align?.match(/[TMB]/))
           adjustTextarea(text, item.area, o)
